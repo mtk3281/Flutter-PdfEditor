@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ToolsScreen extends StatelessWidget {
+  const ToolsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tool'),
+        title: const Text('Tool'),
       ),
       body: Container(
         color: Colors.white,
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -20,11 +22,11 @@ class ToolsScreen extends StatelessWidget {
                   onPressed: () {
                     // Action for Button 1
                   },
-                  child: Text('Button 1'),
+                  child: const Text('Button 1'),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -32,11 +34,11 @@ class ToolsScreen extends StatelessWidget {
                   onPressed: () {
                     // Action for Button 2
                   },
-                  child: Text('Button 2'),
+                  child: const Text('Button 2'),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -44,7 +46,7 @@ class ToolsScreen extends StatelessWidget {
                   onPressed: () {
                     // Action for Button 3
                   },
-                  child: Text('Button 3'),
+                  child: const Text('Button 3'),
                 ),
               ],
             ),
@@ -56,7 +58,7 @@ class ToolsScreen extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: ToolsScreen(),
   ));
 }

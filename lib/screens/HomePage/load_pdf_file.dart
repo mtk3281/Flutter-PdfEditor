@@ -13,7 +13,7 @@ class PdfFinder {
       return foundPdfPaths;
     }
     try {
-      final entities = await Directory(directoryPath).list();
+      final entities = Directory(directoryPath).list();
       await for (var entity in entities) {
         if (entity is File && entity.path.toLowerCase().endsWith('.pdf')) {
           foundPdfPaths.add(entity.path);

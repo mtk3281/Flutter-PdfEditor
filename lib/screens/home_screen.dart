@@ -11,10 +11,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,12 +26,14 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.white,
         fontFamily: 'Lato',
       ),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _PdfEditorState createState() => _PdfEditorState();
 }
@@ -73,7 +77,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
       _RecentsFiles = prefs.getStringList('recentFiles') ?? [];
     });
     _len = _pdfFiles.length;
-    if (_selectedOption == 'All files' && _pdfFiles.length == 0) {
+    if (_selectedOption == 'All files' && _pdfFiles.isEmpty) {
       _scanPdfFiles();
     }
   }
@@ -117,10 +121,10 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('   PDF Editor'),
+        title: const Text('   PDF Editor'),
         centerTitle: false,
         titleTextStyle:
-            TextStyle(color: Colors.black, fontFamily: 'Lato', fontSize: 24),
+            const TextStyle(color: Colors.black, fontFamily: 'Lato', fontSize: 24),
       ),
       body: Stack(
         alignment: Alignment.bottomRight,
@@ -136,11 +140,11 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Row(
                     children: [
-                      Icon(Icons.search),
-                      SizedBox(width: 10),
+                      const Icon(Icons.search),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: TextFormField(
                           onChanged: (String value) {
@@ -158,7 +162,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                               _Searching = value.isNotEmpty;
                             });
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Search files',
                             border: InputBorder.none,
                           ),
@@ -167,19 +171,9 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // Option buttons
                 ToggleButtons(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text('All files'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text('Recents'),
-                    ),
-                  ],
                   isSelected: [
                     _selectedOption == 'All files',
                     _selectedOption == 'Recents',
@@ -188,7 +182,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                     setState(() {
                       _selectedOption = index == 0 ? 'All files' : 'Recents';
                       if (_selectedOption == 'All files' &&
-                          _pdfFiles.length == 0) {
+                          _pdfFiles.isEmpty) {
                         _scanPdfFiles();
                       }
                     });
@@ -200,7 +194,17 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                   borderWidth: 10,
                   splashColor: Colors.transparent,
                   renderBorder: false,
-                  textStyle: TextStyle(fontSize: 18, fontFamily: 'Lato'),
+                  textStyle: const TextStyle(fontSize: 18, fontFamily: 'Lato'),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('All files'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('Recents'),
+                    ),
+                  ],
                 ),
 
                 // Display search results or PDF files list
@@ -222,7 +226,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                             itemBuilder: (context, index) =>
                                 PdfListTile(_pdfFiles[index], context),
                           )
-                        : Text(
+                        : const Text(
                             '\n     No PDF files found',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
@@ -231,7 +235,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 if (!_Searching &&
                     _selectedOption == 'Recents' &&
                     _RecentsFiles.isEmpty)
-                  Text(
+                  const Text(
                     '\n     No Recent files found',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
@@ -257,7 +261,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
             },
           ),
           if (_isLoading && _selectedOption == "All files")
-            Center(
+            const Center(
               child: CircularProgressIndicator(),
             ),
           Container(
@@ -266,19 +270,19 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
             left: 30,
             child: ElevatedButton(
               onPressed: _scanPdfFiles,
-              child: Text('SCAN',
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(50, 50),
+                maximumSize: const Size(100, 60),
+                backgroundColor: const Color.fromARGB(255, 67, 138, 192),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
+              ),
+              child: const Text('SCAN',
                   style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
                       fontFamily: 'Open Sans')),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(50, 50),
-                maximumSize: Size(100, 60),
-                backgroundColor: Color.fromARGB(255, 67, 138, 192),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                ),
-              ),
             ),
           ))
         ],
@@ -290,15 +294,15 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     return ListTile(
       title: Text(
         Path.basename(filePath),
-        style: TextStyle(fontWeight: FontWeight.w600),
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      leading: Image(
+      leading: const Image(
         image:
             AssetImage('assets/pdf-icon2.png'), // Replace with your image path
         width: 40, // Adjust width and height as needed
         height: 40,
       ),
-      trailing: Icon(Icons.arrow_forward, color: Colors.redAccent),
+      trailing: const Icon(Icons.arrow_forward, color: Colors.redAccent),
       splashColor: Colors.transparent,
       hoverColor: Colors.grey,
       minVerticalPadding: 20.0,

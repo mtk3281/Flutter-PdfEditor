@@ -1,4 +1,4 @@
-package com.example.tutorial
+package com.example.pdfeditor
 
 import io.flutter.embedding.android.FlutterActivity
 

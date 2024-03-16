@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class RoundButtonWidget extends StatelessWidget {
   final VoidCallback onClicked;
 
-  const RoundButtonWidget({
+  const RoundButtonWidget({super.key, 
     required this.onClicked,
   });
 
@@ -14,9 +14,9 @@ class RoundButtonWidget extends StatelessWidget {
       right: 30,
       child: FloatingActionButton(
         onPressed: onClicked,
-        child: Icon(Icons.file_open_outlined),
-        backgroundColor: Color.fromARGB(255, 67, 138, 192),
-        shape: CircleBorder(),
+        backgroundColor: const Color.fromARGB(255, 67, 138, 192),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.file_open_outlined),
       ),
     );
   }
