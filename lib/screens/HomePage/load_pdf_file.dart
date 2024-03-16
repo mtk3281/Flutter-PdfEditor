@@ -1,9 +1,19 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter/material.dart';
 
 class PdfFinder {
   static Future<PermissionStatus> checkPermissions() async {
-    return await Permission.storage.request();
+    // AwesomeDialog(
+    //                   context: BuildContext(' Please Grant Permission '),
+    //                   dialogType: DialogType.info,
+    //                   borderSide: const BorderSide(
+    //                     color: Colors.green,
+    //                     width: 2,
+    //                   )
+    return await Permission.manageExternalStorage.request();
+    // return await Permission.storage.request();
   }
 
   static Future<List<String>> findPdfFiles(String directoryPath) async {

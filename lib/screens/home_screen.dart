@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'HomePage/load_pdf_file.dart';
-import 'package:path/path.dart' as Path;
+import 'package:path/path.dart' as path;
 import 'dart:io';
 import 'HomePage/pdf_api.dart';
 import 'HomePage/pdf_viewer_page.dart';
@@ -84,6 +84,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _scanPdfFiles() async {
     PermissionStatus status = await PdfFinder.checkPermissions();
+
     _selectedOption = "All files";
     if (status.isGranted) {
       setState(() {
@@ -123,8 +124,8 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
       appBar: AppBar(
         title: const Text('   PDF Editor'),
         centerTitle: false,
-        titleTextStyle:
-            const TextStyle(color: Colors.black, fontFamily: 'Lato', fontSize: 24),
+        titleTextStyle: const TextStyle(
+            color: Colors.black, fontFamily: 'Lato', fontSize: 24),
       ),
       body: Stack(
         alignment: Alignment.bottomRight,
@@ -154,7 +155,8 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                                 _SearchFiles = [];
                               } else {
                                 _SearchFiles = _pdfFiles
-                                    .where((val) => Path.basename(val)
+                                    .where((val) => path
+                                        .basename(val)
                                         .toLowerCase()
                                         .contains(value.toLowerCase()))
                                     .toList();
@@ -181,8 +183,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                   onPressed: (index) {
                     setState(() {
                       _selectedOption = index == 0 ? 'All files' : 'Recents';
-                      if (_selectedOption == 'All files' &&
-                          _pdfFiles.isEmpty) {
+                      if (_selectedOption == 'All files' && _pdfFiles.isEmpty) {
                         _scanPdfFiles();
                       }
                     });
@@ -293,7 +294,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
   ListTile PdfListTile(String filePath, BuildContext context) {
     return ListTile(
       title: Text(
-        Path.basename(filePath),
+        path.basename(filePath),
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       leading: const Image(
