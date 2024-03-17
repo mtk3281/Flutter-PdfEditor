@@ -39,7 +39,6 @@ dependencies:
   sliding_clipped_nav_bar: ^3.1.1
   flutter_native_splash: ^2.3.13
   icons_launcher: ^2.1.7
-  awesome_dialog: ^3.2.0s
 
 
 dev_dependencies:
@@ -103,8 +102,13 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/pdf-icon.png
+    - assets/pdf-icon1.png
     - assets/pdf-icon2.png
+    - assets/pdf-icon3.png
+    - assets/access-permission.png
+    - assets/no-permission.png
+    - assets/qr-scan.png
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

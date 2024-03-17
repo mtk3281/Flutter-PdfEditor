@@ -2,12 +2,6 @@
   "configVersion": 2,
   "packages": [
     {
-      "name": "advance_pdf_viewer",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/advance_pdf_viewer-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "ansicolor",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/ansicolor-2.0.2",
       "packageUri": "lib/",
@@ -30,12 +24,6 @@
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
-    },
-    {
-      "name": "awesome_dialog",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/awesome_dialog-3.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "boolean_selector",
@@ -104,22 +92,10 @@
       "languageVersion": "2.19"
     },
     {
-      "name": "fixnum",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.19"
-    },
-    {
       "name": "flutter",
       "rootUri": "file:///C:/flutter/flutter/packages/flutter",
       "packageUri": "lib/",
       "languageVersion": "3.2"
-    },
-    {
-      "name": "flutter_cache_manager",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_cache_manager-3.3.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
     },
     {
       "name": "flutter_lints",
@@ -158,28 +134,10 @@
       "languageVersion": "3.2"
     },
     {
-      "name": "graphs",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/graphs-2.3.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
       "name": "html",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.4",
       "packageUri": "lib/",
       "languageVersion": "2.19"
-    },
-    {
-      "name": "http",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.2.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "http_parser",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "icons_launcher",
@@ -192,12 +150,6 @@
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.1.7",
       "packageUri": "lib/",
       "languageVersion": "2.15"
-    },
-    {
-      "name": "infinite_listview",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/infinite_listview-1.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "js",
@@ -244,12 +196,6 @@
     {
       "name": "meta",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "numberpicker",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/numberpicker-2.1.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -356,24 +302,6 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "rive",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/rive-0.12.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "rive_common",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/rive_common-0.2.8",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "rxdart",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/rxdart-0.27.7",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "shared_preferences",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.2.2",
       "packageUri": "lib/",
@@ -434,24 +362,6 @@
       "languageVersion": "2.18"
     },
     {
-      "name": "sprintf",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "sqflite",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite-2.3.2",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "sqflite_common",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common-2.5.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
       "name": "stack_trace",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.11.1",
       "packageUri": "lib/",
@@ -468,12 +378,6 @@
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/string_scanner-1.2.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
-    },
-    {
-      "name": "synchronized",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/synchronized-3.1.0+1",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
     },
     {
       "name": "term_glyph",
@@ -498,12 +402,6 @@
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/universal_io-2.2.2",
       "packageUri": "lib/",
       "languageVersion": "2.17"
-    },
-    {
-      "name": "uuid",
-      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.3.3",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
     },
     {
       "name": "vector_math",
@@ -554,7 +452,7 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-03-16T13:50:29.002461Z",
+  "generated": "2024-03-17T21:45:29.791338Z",
   "generator": "pub",
   "generatorVersion": "3.3.0"
 }
