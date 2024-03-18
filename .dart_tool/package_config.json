@@ -302,6 +302,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "receive_sharing_intent",
+      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/receive_sharing_intent-1.6.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "shared_preferences",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.2.2",
       "packageUri": "lib/",
@@ -452,7 +458,7 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-03-17T21:45:29.791338Z",
+  "generated": "2024-03-18T21:22:07.237619Z",
   "generator": "pub",
   "generatorVersion": "3.3.0"
 }

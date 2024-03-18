@@ -68,8 +68,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _onScroll() {
     setState(() {
-      _isScrolling =
-          _scrollController.offset > 10; // Adjust threshold as needed
+      _isScrolling = _scrollController.offset > 0; // Adjust threshold as needed
     });
   }
 
@@ -375,6 +374,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 left: 35,
                 child: ElevatedButton(
                     onPressed: () {
+                      _selectedOption = "All files";
                       _scanPdfFiles();
                     },
                     style: ElevatedButton.styleFrom(

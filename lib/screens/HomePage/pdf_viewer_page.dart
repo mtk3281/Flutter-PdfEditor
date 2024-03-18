@@ -49,16 +49,19 @@ class _PDFViewerPageState extends State<PDFViewerPage> {
             : null,
       ),
       body: PDFView(
+        // nightMode: true,
         filePath: widget.file.path,
-        // autoSpacing: false,
-        // swipeHorizontal: true,
-        // pageSnap: false,
-        // pageFling: false,
+        preventLinkNavigation: false,
+        autoSpacing: false,
+        fitPolicy: FitPolicy.WIDTH,
+        pageSnap: false,
+        pageFling: false,
         onRender: (pages) => setState(() => this.pages = pages!),
         onViewCreated: (controller) =>
             setState(() => this.controller = controller),
         onPageChanged: (indexPage, _) =>
             setState(() => this.indexPage = indexPage!),
+        onLinkHandler: (String? link) {},
       ),
     );
   }

@@ -2,9 +2,40 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/tools_screen.dart';
 import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'screens/HomePage/pdf_viewer_page.dart';
+import 'dart:io';
 
-void main() {
-  runApp(const MyApp());
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+void main() async {
+  // Initialize the app
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Run the app
+  runApp(MyApp());
+
+  // Listen to media sharing intents
+  ReceiveSharingIntent.getMediaStream().listen((value) {
+    File pdf = File(value[0].path);
+    openPDF(navigatorKey.currentContext!, pdf);
+  }, onError: (err) {
+    print("getMediaStream error: $err");
+  });
+
+  List<SharedMediaFile> sharedFiles =
+      await ReceiveSharingIntent.getInitialMedia();
+  if (sharedFiles.isNotEmpty) {
+    File pdf = File(sharedFiles[0].path);
+    openPDF(navigatorKey.currentContext!, pdf);
+  }
+}
+
+void openPDF(BuildContext context, File file) async {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => PDFViewerPage(file: file, key: UniqueKey()),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,7 +43,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       home: BottomTabBar(),
     );
