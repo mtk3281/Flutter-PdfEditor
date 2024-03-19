@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'HomePage/load_pdf_file.dart';
@@ -7,8 +6,8 @@ import 'package:path/path.dart' as path;
 import 'dart:io';
 import 'HomePage/pdf_api.dart';
 import 'HomePage/pdf_viewer_page.dart';
-import 'HomePage/add_button_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart' as intl;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,12 +39,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
-  String _selectedOption = 'All files'; // Initialize with a default option
+  String _selectedOption = 'PDF files'; // Initialize with a default option
   final ScrollController _scrollController = ScrollController();
+
   bool _isScrolling = false;
-  List<String> _pdfFiles = [];
+  List<String> _files = [];
   List<String> _RecentsFiles = [];
   List<String> _SearchFiles = [];
+  List<String> Buildfile = [];
   bool _permStatus = false;
   bool _isLoading = false;
   bool _Searching = false;
@@ -69,7 +70,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _onScroll() {
     setState(() {
-      _isScrolling = _scrollController.offset > 0; // Adjust threshold as needed
+      _isScrolling = _scrollController.offset > 0;
     });
   }
 
@@ -82,20 +83,20 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _scanPdfFiles() async {
-    PermissionStatus status = await PdfFinder.checkPermissions();
+    PermissionStatus status = await FileFinder.checkPermissions();
     if (status.isGranted) {
       setState(() {
         _isLoading = true;
         _permStatus = true; // Update _permStatus based on permission status
       });
       // Find PDF files
-      _pdfFiles = await PdfFinder.findPdfFiles(
-        'storage/emulated/0',
-      );
-      _len = _pdfFiles.length;
-      await _saveFiles(); // No need to await, but ensure it's awaited in _saveFiles()
+      _files = await FileFinder.findFiles(
+          'storage/emulated/0', ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt']);
+      _len = _files.length;
+      print(_len);
+      await _saveFiles();
       setState(() {
-        _isLoading = false; // Update UI after saving files
+        _isLoading = false;
       });
     } else {
       // Permission is not granted, request permission
@@ -104,39 +105,27 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> loadFiles() async {
-    print('looooooooooooooadddddddddddddinnnnnnnnnnnnnnnngggggggggggggg');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _pdfFiles = prefs.getStringList('pdfFiles') ?? [];
+      _files = prefs.getStringList('pdfFiles') ?? [];
       _RecentsFiles = prefs.getStringList('recentFiles') ?? [];
       _permStatus = prefs.getBool('permissionStatus') ?? false;
       prefs.setStringList(
           'recentFiles', _RecentsFiles); // Load permission status
-      print(_RecentsFiles.length);
     });
-    _len = _pdfFiles.length;
-    if (_selectedOption == 'All files' && _pdfFiles.isEmpty && !_permStatus) {
+    _len = _files.length;
+    if (_selectedOption == 'PDF files' && _files.isEmpty && !_permStatus) {
       _showStoragePermissionBottomSheet();
     }
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   final prefs = Provider.of<SharedPreferences>(context);
-  //   prefs.addListener(() {
-  //     loadFiles(); // Call _loadFiles when SharedPreferences change
-  //   });
-  //   loadFiles(); // Initial load on dependency change
-  // }
-
   Future<void> _saveFiles() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('pdfFiles', _pdfFiles); // Await saving operation
+    await prefs.setStringList('pdfFiles', _files); // Await saving operation
     await prefs.setStringList('recentFiles', _RecentsFiles);
     await prefs.setBool(
         'permissionStatus', _permStatus); // Save permission status
-    _len = _pdfFiles.length;
+    _len = _files.length;
   }
 
   void _addRecentFile(String filePath) async {
@@ -149,66 +138,191 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     prefs.setStringList('recentFiles', _RecentsFiles);
   }
 
+  Color _getSelectedOptionColor() {
+    switch (_selectedOption) {
+      case 'PDF files':
+        return Color.fromRGBO(222, 32, 42, 1.000);
+      case 'Text':
+        return Color.fromRGBO(99, 99, 99, 1.000);
+      case 'Word':
+        return Color.fromRGBO(79, 141, 245, 1.000);
+      case 'PPT':
+        return const Color.fromRGBO(245, 185, 18, 1.000);
+      case 'Recents':
+        return Colors.black;
+      default:
+        return Color.fromRGBO(
+            49, 49, 61, 1.000); // Default color for unexpected options
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // print(_permStatus);
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor:
+            _getSelectedOptionColor(), // Dynamic color based on selection
         scrolledUnderElevation: 0.0,
-        title: const Text('   PDF Editor'),
+        title: const Text('  PDF Editor'), // Leading space for alignment
         centerTitle: false,
+        // titleSpacing: 20.0, // Adjust title spacing
         titleTextStyle: const TextStyle(
-            color: Colors.black, fontFamily: 'Lato', fontSize: 24),
+          color: Color.fromARGB(255, 255, 255, 255),
+          fontFamily: 'Lato',
+          fontSize: 24,
+        ),
+        // Adjust toolbar height
+        toolbarHeight: 65.0,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.search,
+              color: Colors.white,
+              size: 30,
+            ),
+            onPressed: () {
+              // Handle search functionality (your implementation)
+            },
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.folder_open_outlined,
+              color: Colors.white,
+              size: 30,
+            ),
+            onPressed: () async {
+              final file = await PDFApi.pickFile();
+              if (file == null) return;
+              openPDF(context, file);
+              _RecentsFiles.add(file.path);
+            },
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.sort,
+              color: Colors.white,
+              size: 30,
+            ),
+            onPressed: () {
+              // Handle sort functionality (your implementation)
+            },
+          ),
+          SizedBox(
+            width: 10,
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize:
+              const Size.fromHeight(60.0), // Adjust bottom section height
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, // Scroll horizontally
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0), // Adjust padding
+            child: ToggleButtons(
+              isSelected: [
+                _selectedOption == 'PDF files',
+                _selectedOption == 'Word',
+                _selectedOption == 'PPT',
+                _selectedOption == 'Text',
+                _selectedOption == 'Recents',
+              ],
+              onPressed: (index) {
+                setState(() {
+                  _selectedOption = index == 0 ? 'PDF files' : 'Recents';
+                  switch (index) {
+                    case 0:
+                      _selectedOption = 'PDF files';
+                    case 1:
+                      _selectedOption = 'Word';
+                    case 2:
+                      _selectedOption = 'PPT';
+                    case 3:
+                      _selectedOption = 'Text';
+                    case 4:
+                      _selectedOption = 'Recents';
+                    default:
+                      _selectedOption = 'PDF files';
+                    // Default color for unexpected options
+                  }
+                  if (_selectedOption == 'PDF files') {}
+                  if (_selectedOption == 'Word') {
+                    print('Word file displayed');
+                  }
+                  if (_selectedOption == 'PPT') {
+                    print('PPT file displayed');
+                  }
+                  if (_selectedOption == 'Text') {
+                    print('Text file displayed');
+                  }
+                  if (_selectedOption == 'Recents') {
+                    loadFiles();
+                  }
+                });
+              },
+              color: Color.fromARGB(
+                  255, 142, 142, 142), // Base color for unselected buttons
+              selectedColor: const Color.fromARGB(
+                  255, 255, 255, 255), // Dynamic color based on selection
+              selectedBorderColor: Colors.transparent,
+              fillColor: Colors.transparent,
+              splashColor: Color.fromARGB(142, 133, 133, 133),
+              borderRadius: BorderRadius.circular(15),
+              borderWidth: 1,
+              renderBorder: false,
+              textStyle: const TextStyle(fontSize: 18, fontFamily: 'Lato'),
+              children: const [
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, right: 16),
+                  child: Text(
+                    'PDF',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, right: 16),
+                  child: Text(
+                    'Word',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, right: 16),
+                  child: Text(
+                    'PPT',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, right: 16),
+                  child: Text(
+                    'Text',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, right: 16),
+                  child: Text(
+                    'Recents',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: Stack(
         alignment: Alignment.bottomRight,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 30, right: 20, top: 20),
+            padding: const EdgeInsets.only(left: 30, right: 20, top: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Search section
-                Container(
-                  decoration: BoxDecoration(
-                    // color: Colors.grey[300],
-                    color: const Color.fromARGB(159, 208, 226, 234),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextFormField(
-                          onChanged: (String value) {
-                            setState(() {
-                              _selectedOption = 'All files';
-                              if (value.isEmpty) {
-                                _SearchFiles = [];
-                              } else {
-                                _SearchFiles = _pdfFiles
-                                    .where((val) => path
-                                        .basename(val)
-                                        .toLowerCase()
-                                        .contains(value.toLowerCase()))
-                                    .toList();
-                              }
-                              _Searching = value.isNotEmpty;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            hintText: 'Search files',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
+                //perission denied screen
                 Visibility(
                   visible: !_permStatus,
                   child: Container(
@@ -274,46 +388,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
 
                 Visibility(
-                  visible: _permStatus,
-                  child: ToggleButtons(
-                    isSelected: [
-                      _selectedOption == 'All files',
-                      _selectedOption == 'Recents',
-                    ],
-                    onPressed: (index) {
-                      setState(() {
-                        _selectedOption = index == 0 ? 'All files' : 'Recents';
-                        if (_selectedOption == 'All files' &&
-                            _pdfFiles.isEmpty) {
-                          _scanPdfFiles();
-                        }
-                        if (_selectedOption == 'Recents') {
-                          loadFiles();
-                        }
-                      });
-                    },
-                    color: Colors.grey,
-                    selectedColor: Colors.red,
-                    fillColor: Colors.transparent,
-                    borderRadius: BorderRadius.circular(4.0),
-                    borderWidth: 10,
-                    splashColor: Colors.transparent,
-                    renderBorder: false,
-                    textStyle:
-                        const TextStyle(fontSize: 18, fontFamily: 'Lato'),
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text('All files'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text('Recents'),
-                      ),
-                    ],
-                  ),
-                ),
-                Visibility(
                   visible: _Searching && _permStatus,
                   child: Expanded(
                     child: ListView.builder(
@@ -324,18 +398,26 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
+
                 Visibility(
                   visible: !_Searching &&
-                      _selectedOption == 'All files' &&
+                      _selectedOption == 'PDF files' &&
                       !_isLoading &&
                       _permStatus,
                   child: Expanded(
-                    child: _pdfFiles.isNotEmpty
-                        ? ListView.builder(
-                            controller: _scrollController,
-                            itemCount: _len,
-                            itemBuilder: (context, index) =>
-                                PdfListTile(_pdfFiles[index], context),
+                    child: _files.isNotEmpty
+                        ? RefreshIndicator(
+                            color: Colors.black,
+                            // Add RefreshIndicator for swipe-to-refresh
+                            onRefresh: () async {
+                              await _scanPdfFiles(); // Refresh data
+                            },
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: _len,
+                              itemBuilder: (context, index) =>
+                                  PdfListTile(_files[index], context),
+                            ),
                           )
                         : const Text(
                             '\n     No PDF files found',
@@ -344,6 +426,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                   ),
                 ),
+
                 Visibility(
                   visible: !_Searching &&
                       _selectedOption == 'Recents' &&
@@ -371,56 +454,72 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
               ],
             ),
           ),
-          Visibility(
-              visible: _permStatus && !_isScrolling && !_isLoading,
-              child: RoundButtonWidget(
-                onClicked: () async {
-                  final file = await PDFApi.pickFile();
-                  if (file == null) return;
-                  openPDF(context, file);
-                  _RecentsFiles.add(file.path);
-                },
-              )),
-          if (_isLoading && _selectedOption == "All files")
-            const Center(
-              child: CircularProgressIndicator(),
+          if (_isLoading)
+            Center(
+              child: CircularProgressIndicator(
+                color: _getSelectedOptionColor(),
+              ),
             ),
-          Visibility(
-              visible: _permStatus && !_isScrolling && !_isLoading,
-              child: Positioned(
-                bottom: 60,
-                left: 35,
-                child: ElevatedButton(
-                    onPressed: () {
-                      _selectedOption = "All files";
-                      _scanPdfFiles();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(8),
-                      fixedSize: const Size(64, 64),
-                      backgroundColor: const Color.fromARGB(255, 228, 242, 255),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.refresh_outlined,
-                      color: Colors.grey[900],
-                      weight: 10.0,
-                      size: 35,
-                    )),
-              )),
         ],
       ),
     );
   }
 
+  Container SearchWidget() {
+    return Container(
+      decoration: BoxDecoration(
+        // color: Colors.grey[300],
+        color: const Color.fromARGB(159, 208, 226, 234),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Row(
+        children: [
+          const Icon(Icons.search),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextFormField(
+              onChanged: (String value) {
+                setState(() {
+                  _selectedOption = 'PDF files';
+                  if (value.isEmpty) {
+                    _SearchFiles = [];
+                  } else {
+                    _SearchFiles = _files
+                        .where((val) => path
+                            .basename(val)
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
+                        .toList();
+                  }
+                  _Searching = value.isNotEmpty;
+                });
+              },
+              decoration: const InputDecoration(
+                hintText: 'Search files',
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String DateConvert(String filepath) {
+    File file = File(filepath);
+    DateTime date = file.lastModifiedSync();
+    return intl.DateFormat('MMM d, y, HH:mm a').format(date).toString();
+  }
+
   ListTile PdfListTile(String filePath, BuildContext context) {
     return ListTile(
-      title: Text(
-        path.basename(filePath),
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      shape: const RoundedRectangleBorder(),
+      title: Text(path.basename(filePath),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis),
+      subtitle: Text(DateConvert(filePath)),
       leading: const Image(
         image:
             AssetImage('assets/pdf-icon1.png'), // Replace with your image path
@@ -443,6 +542,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
           _addRecentFile(filePath);
         });
       },
+      contentPadding: EdgeInsets.only(left: 0, right: 0),
     );
   }
 
@@ -474,7 +574,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Due to system restrictions, All Files Access permission is required to read all local files.',
+                'Due to system restrictions, PDF files Access permission is required to read all local files.',
                 textAlign: TextAlign.justify,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
@@ -585,7 +685,16 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                   children: [
                     InkWell(
                       onTap: () {
-                        print("Details");
+                        print("Details pressed");
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => Dialog(
+                              // Use Dialog instead of Dialogue
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: detailsdialogue(filePath)),
+                        );
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -692,8 +801,85 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  Container detailsdialogue(String filePath) {
+    File file = File(filePath);
+    int fileSizeInBytes = file.lengthSync();
+
+    String fileSize = (fileSizeInBytes / 1024).toStringAsFixed(2);
+
+    final formattedDate = DateConvert(filePath);
+
+    List<String> Title = [
+      "Title",
+      "File Type",
+      "Path",
+      "Size",
+      "Last Modified"
+    ];
+    List<String> values = [
+      path.basename(filePath),
+      "PDF",
+      filePath,
+      "$fileSize KB",
+      formattedDate,
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(20.0), // Add padding to the container
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.0), // Rounded corners
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Content fits within screen
+        crossAxisAlignment: CrossAxisAlignment.start, // Align elements left
+        children: [
+          const Row(
+            // Row for title
+            children: [
+              Text(
+                'File Info',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 15.0), // Spacing between title and text
+
+          for (int i = 0; i < 5; i++)
+            Column(
+              mainAxisSize: MainAxisSize.min, // Content fits within screen
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Align elements left
+              children: [
+                Text(
+                  Title[i],
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Color.fromARGB(255, 66, 66, 66),
+                  ),
+                ),
+                SizedBox(height: 3.0), // Spacing between text1 and text2/text3
+                Text(
+                  values[i],
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 25.0),
+              ],
+            )
+        ],
+      ),
+    );
+  }
+
   void _requestPermission() async {
-    PermissionStatus status = await PdfFinder.checkPermissions();
+    PermissionStatus status = await FileFinder.checkPermissions();
     if (status.isGranted) {
       _scanPdfFiles();
     }

@@ -104,7 +104,7 @@ class _BottomTabBarState extends State<BottomTabBar> {
           });
         },
         iconSize: 30,
-        activeColor: const Color(0xFF01579B),
+        activeColor: Color.fromARGB(255, 195, 11, 11),
         barItems: [
           BarItem(
             icon: Icons.maps_home_work_rounded,

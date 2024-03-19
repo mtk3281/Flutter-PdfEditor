@@ -1,36 +1,44 @@
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async';
 import 'dart:io';
 
-class PdfFinder {
+class FileFinder {
+  // Renamed class for broader functionality
+
   static Future<PermissionStatus> checkPermissions() async {
     return await Permission.manageExternalStorage.request();
-    // return await Permission.storage.request();
   }
 
-  static Future<List<String>> findPdfFiles(String directoryPath) async {
-    List<String> foundPdfPaths = [];
-    if (!Directory(directoryPath).existsSync()) {
+  static Future<List<String>> findFiles(
+      String directoryPath, List<String> extensions) async {
+    List<String> foundFilePaths = [];
+    if (!(await Directory(directoryPath).exists())) {
       print('Directory does not exist: $directoryPath');
-      return foundPdfPaths;
+      return foundFilePaths;
     }
+
     try {
-      final entities = Directory(directoryPath).list();
-      await for (var entity in entities) {
-        if (entity is File && entity.path.toLowerCase().endsWith('.pdf')) {
-          foundPdfPaths.add(entity.path);
+      final entities = await Directory(directoryPath).list().toList();
+
+      // Process each entity concurrently
+      await Future.forEach(entities, (entity) async {
+        if (entity is File) {
+          final extension = entity.path.split('.').last.toLowerCase();
+          if (extensions.contains(extension)) {
+            foundFilePaths.add(entity.path);
+          }
         } else if (entity is Directory) {
           try {
-            await entity.list().toList();
-            List<String> subPaths = await findPdfFiles(entity.path);
-            foundPdfPaths.addAll(subPaths);
+            final subPaths = await findFiles(entity.path, extensions);
+            foundFilePaths.addAll(subPaths);
           } catch (e) {
             print('Skipping inaccessible directory: ${entity.path}');
           }
         }
-      }
+      });
     } catch (e) {
       print('Error while listing directory contents: $e');
     }
-    return foundPdfPaths;
+    return foundFilePaths;
   }
 }

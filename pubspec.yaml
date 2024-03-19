@@ -40,6 +40,9 @@ dependencies:
   flutter_native_splash: ^2.3.13
   icons_launcher: ^2.1.7
   receive_sharing_intent: ^1.6.7
+  intl: ^0.19.0
+  # files_scanner_android: ^1.0.0
+  # file_finder: ^0.1.1
 
 
 dev_dependencies:

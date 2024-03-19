@@ -152,6 +152,12 @@
       "languageVersion": "2.15"
     },
     {
+      "name": "intl",
+      "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "js",
       "rootUri": "file:///C:/Users/tkmun/AppData/Local/Pub/Cache/hosted/pub.dev/js-0.7.1",
       "packageUri": "lib/",
@@ -458,7 +464,7 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-03-18T21:22:07.237619Z",
+  "generated": "2024-03-19T18:14:06.194532Z",
   "generator": "pub",
   "generatorVersion": "3.3.0"
 }
