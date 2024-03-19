@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'HomePage/load_pdf_file.dart';
@@ -35,10 +36,10 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _PdfEditorState createState() => _PdfEditorState();
+  PdfEditorState createState() => PdfEditorState();
 }
 
-class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
+class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
   String _selectedOption = 'All files'; // Initialize with a default option
   final ScrollController _scrollController = ScrollController();
   bool _isScrolling = false;
@@ -55,7 +56,7 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
-    _loadFiles();
+    loadFiles();
   }
 
   @override
@@ -102,19 +103,32 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _loadFiles() async {
+  Future<void> loadFiles() async {
+    print('looooooooooooooadddddddddddddinnnnnnnnnnnnnnnngggggggggggggg');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _pdfFiles = prefs.getStringList('pdfFiles') ?? [];
       _RecentsFiles = prefs.getStringList('recentFiles') ?? [];
-      _permStatus =
-          prefs.getBool('permissionStatus') ?? false; // Load permission status
+      _permStatus = prefs.getBool('permissionStatus') ?? false;
+      prefs.setStringList(
+          'recentFiles', _RecentsFiles); // Load permission status
+      print(_RecentsFiles.length);
     });
     _len = _pdfFiles.length;
     if (_selectedOption == 'All files' && _pdfFiles.isEmpty && !_permStatus) {
       _showStoragePermissionBottomSheet();
     }
   }
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   final prefs = Provider.of<SharedPreferences>(context);
+  //   prefs.addListener(() {
+  //     loadFiles(); // Call _loadFiles when SharedPreferences change
+  //   });
+  //   loadFiles(); // Initial load on dependency change
+  // }
 
   Future<void> _saveFiles() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -127,7 +141,8 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _addRecentFile(String filePath) async {
     if (!_RecentsFiles.contains(filePath)) {
-      _RecentsFiles.add(filePath);
+      // _RecentsFiles.add(filePath);
+      _RecentsFiles.insert(0, filePath);
     }
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -271,6 +286,9 @@ class _PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         if (_selectedOption == 'All files' &&
                             _pdfFiles.isEmpty) {
                           _scanPdfFiles();
+                        }
+                        if (_selectedOption == 'Recents') {
+                          loadFiles();
                         }
                       });
                     },

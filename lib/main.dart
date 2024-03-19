@@ -5,7 +5,9 @@ import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'screens/HomePage/pdf_viewer_page.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
+final GlobalKey<PdfEditorState> homeScreenKey = GlobalKey();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   // Initialize the app
@@ -31,6 +33,12 @@ void main() async {
 }
 
 void openPDF(BuildContext context, File file) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String>? recentFiles = prefs.getStringList('recentFiles') ?? [];
+  recentFiles.insert(0, file.path);
+  await prefs.setStringList('recentFiles', recentFiles);
+  await homeScreenKey.currentState?.loadFiles();
+
   Navigator.of(context).push(
     MaterialPageRoute(
       builder: (context) => PDFViewerPage(file: file, key: UniqueKey()),
@@ -46,7 +54,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: BottomTabBar(),
+      home: BottomTabBar(
+        key: homeScreenKey,
+      ),
     );
   }
 }

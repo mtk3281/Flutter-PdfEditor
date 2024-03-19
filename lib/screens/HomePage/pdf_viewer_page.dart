@@ -61,7 +61,6 @@ class _PDFViewerPageState extends State<PDFViewerPage> {
             setState(() => this.controller = controller),
         onPageChanged: (indexPage, _) =>
             setState(() => this.indexPage = indexPage!),
-        onLinkHandler: (String? link) {},
       ),
     );
   }
