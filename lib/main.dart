@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final GlobalKey<PdfEditorState> homeScreenKey = GlobalKey();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   // Initialize the app
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,10 +71,7 @@ class BottomTabBar extends StatefulWidget {
 
 class _BottomTabBarState extends State<BottomTabBar> {
   int _index = 0;
-  final screens = [
-    const HomeScreen(),
-    const ToolsScreen(),
-  ];
+
   final _pageController = PageController();
 
   @override
@@ -84,6 +82,12 @@ class _BottomTabBarState extends State<BottomTabBar> {
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      HomeScreen(isBookmarked: _index == 0 ? false : true),
+      HomeScreen(isBookmarked: _index == 0 ? false : true),
+      const ToolsScreen(),
+      const ToolsScreen(),
+    ];
     return Scaffold(
       body: PageView(
         physics: const NeverScrollableScrollPhysics(),
@@ -109,6 +113,14 @@ class _BottomTabBarState extends State<BottomTabBar> {
           BarItem(
             icon: Icons.maps_home_work_rounded,
             title: 'Home',
+          ),
+          BarItem(
+            icon: Icons.bookmark_added_rounded,
+            title: 'Bookmarks',
+          ),
+          BarItem(
+            icon: Icons.chat,
+            title: 'ChatBot',
           ),
           BarItem(
             icon: Icons.settings,

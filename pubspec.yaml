@@ -41,8 +41,11 @@ dependencies:
   icons_launcher: ^2.1.7
   receive_sharing_intent: ^1.6.7
   intl: ^0.19.0
-  # files_scanner_android: ^1.0.0
-  # file_finder: ^0.1.1
+  open_file: ^3.3.2
+  pdfx: ^2.6.0
+
+
+
 
 
 dev_dependencies:
@@ -106,7 +109,13 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/pdf-icon1.png
+    - assets/pdf.png
+    - assets/doc.png
+    - assets/docx.png
+    - assets/ppt.png
+    - assets/ppt.png
+    - assets/txt.png
+
     - assets/pdf-icon2.png
     - assets/pdf-icon3.png
     - assets/access-permission.png

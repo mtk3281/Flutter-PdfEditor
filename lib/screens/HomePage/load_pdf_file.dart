@@ -3,18 +3,18 @@ import 'dart:async';
 import 'dart:io';
 
 class FileFinder {
-  // Renamed class for broader functionality
-
   static Future<PermissionStatus> checkPermissions() async {
     return await Permission.manageExternalStorage.request();
   }
 
-  static Future<List<String>> findFiles(
+  static Future<Map<String, List<String>>> findFiles(
       String directoryPath, List<String> extensions) async {
-    List<String> foundFilePaths = [];
+    final foundFiles = <String, List<String>>{};
+    final extensionsSet = extensions.map((ext) => ext.toLowerCase()).toSet();
+
     if (!(await Directory(directoryPath).exists())) {
       print('Directory does not exist: $directoryPath');
-      return foundFilePaths;
+      return foundFiles;
     }
 
     try {
@@ -24,13 +24,19 @@ class FileFinder {
       await Future.forEach(entities, (entity) async {
         if (entity is File) {
           final extension = entity.path.split('.').last.toLowerCase();
-          if (extensions.contains(extension)) {
-            foundFilePaths.add(entity.path);
+          if (foundFiles.containsKey(extension)) {
+            foundFiles
+                .putIfAbsent(extension, () => [])
+                .add(entity.path); // Add to extension-specific list
           }
         } else if (entity is Directory) {
           try {
             final subPaths = await findFiles(entity.path, extensions);
-            foundFilePaths.addAll(subPaths);
+            for (var ext in subPaths.keys) {
+              foundFiles
+                  .putIfAbsent(ext, () => [])
+                  .addAll(subPaths[ext]!); // Merge subdirectory results
+            }
           } catch (e) {
             print('Skipping inaccessible directory: ${entity.path}');
           }
@@ -39,6 +45,6 @@ class FileFinder {
     } catch (e) {
       print('Error while listing directory contents: $e');
     }
-    return foundFilePaths;
+    return foundFiles;
   }
 }
