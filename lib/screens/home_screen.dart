@@ -13,6 +13,7 @@ import 'package:open_file/open_file.dart';
 import 'package:flutter/services.dart';
 import 'HomePage/RenameDialogue.dart';
 import 'HomePage/DeleteDialogue.dart';
+import 'HomePage/sort file.dart';
 
 void main() {
   bool isBookmarked = false;
@@ -90,7 +91,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_onScroll);
     loadFiles();
-    print(widget.isBookmarked);
   }
 
   @override
@@ -125,7 +125,11 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
       scanFiles = await FileFinder.findFiles(
           'storage/emulated/0', ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt']);
 
+      print(scanFiles.keys); // Print keys (extensions) after completion
+
+// Now it's safe to access scanFiles['pdf']
       pdf_files = scanFiles['pdf']!;
+      print(pdf_files.length);
       word_files = (scanFiles['doc'] ?? []) +
           (scanFiles['docx'] ?? []); // Combine doc and docx files
       ppt_files = (scanFiles['ppt'] ?? []) +
@@ -194,6 +198,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     await prefs.setStringList('ppt_files', ppt_files);
     await prefs.setStringList('txt_files', txt_files);
     await prefs.setStringList("bookmarked", Bookmarked);
+    await prefs.setStringList('recentFiles', _RecentsFiles);
     await prefs.setBool(
         'permissionStatus', _permStatus); // Save permission status
     _len = pdf_files.length;
@@ -289,6 +294,139 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() {});
   }
 
+  Future<void> sortPathfile(String sortBy, String orderBy) async {
+    setState(() {
+      switch (sortBy) {
+        case "File":
+          if (orderBy == "Ascending") {
+            pdf_files.sort((a, b) => _getBaseName(a)
+                .toLowerCase()
+                .compareTo(_getBaseName(b).toLowerCase()));
+            word_files.sort((a, b) => _getBaseName(a)
+                .toLowerCase()
+                .compareTo(_getBaseName(b).toLowerCase()));
+            ppt_files.sort((a, b) => _getBaseName(a)
+                .toLowerCase()
+                .compareTo(_getBaseName(b).toLowerCase()));
+            txt_files.sort((a, b) => _getBaseName(a)
+                .toLowerCase()
+                .compareTo(_getBaseName(b).toLowerCase()));
+            _RecentsFiles.sort((a, b) => _getBaseName(a)
+                .toLowerCase()
+                .compareTo(_getBaseName(b).toLowerCase()));
+          } else {
+            pdf_files.sort((a, b) => _getBaseName(b)
+                .toLowerCase()
+                .compareTo(_getBaseName(a).toLowerCase()));
+            word_files.sort((a, b) => _getBaseName(b)
+                .toLowerCase()
+                .compareTo(_getBaseName(a).toLowerCase()));
+            ppt_files.sort((a, b) => _getBaseName(b)
+                .toLowerCase()
+                .compareTo(_getBaseName(a).toLowerCase()));
+            txt_files.sort((a, b) => _getBaseName(b)
+                .toLowerCase()
+                .compareTo(_getBaseName(a).toLowerCase()));
+            _RecentsFiles.sort((a, b) => _getBaseName(b)
+                .toLowerCase()
+                .compareTo(_getBaseName(a).toLowerCase()));
+          }
+          break;
+        case "Date":
+          if (orderBy == "Ascending") {
+            pdf_files.sort((a, b) =>
+                getFileCreationDate(a).compareTo(getFileCreationDate(b)));
+            word_files.sort((a, b) =>
+                getFileCreationDate(a).compareTo(getFileCreationDate(b)));
+            ppt_files.sort((a, b) =>
+                getFileCreationDate(a).compareTo(getFileCreationDate(b)));
+            txt_files.sort((a, b) =>
+                getFileCreationDate(a).compareTo(getFileCreationDate(b)));
+            _RecentsFiles.sort((a, b) =>
+                getFileCreationDate(a).compareTo(getFileCreationDate(b)));
+          } else {
+            pdf_files.sort((a, b) =>
+                getFileCreationDate(b).compareTo(getFileCreationDate(a)));
+            word_files.sort((a, b) =>
+                getFileCreationDate(b).compareTo(getFileCreationDate(a)));
+            ppt_files.sort((a, b) =>
+                getFileCreationDate(b).compareTo(getFileCreationDate(a)));
+            txt_files.sort((a, b) =>
+                getFileCreationDate(b).compareTo(getFileCreationDate(a)));
+            _RecentsFiles.sort((a, b) =>
+                getFileCreationDate(b).compareTo(getFileCreationDate(a)));
+          }
+          break;
+        case "Size":
+          // Sort by size
+          if (orderBy == "Ascending") {
+            pdf_files.sort(
+                (a, b) => File(a).lengthSync().compareTo(File(b).lengthSync()));
+            word_files.sort(
+                (a, b) => File(a).lengthSync().compareTo(File(b).lengthSync()));
+            ppt_files.sort(
+                (a, b) => File(a).lengthSync().compareTo(File(b).lengthSync()));
+            txt_files.sort(
+                (a, b) => File(a).lengthSync().compareTo(File(b).lengthSync()));
+            _RecentsFiles.sort(
+                (a, b) => File(a).lengthSync().compareTo(File(b).lengthSync()));
+          } else {
+            pdf_files.sort(
+                (a, b) => File(b).lengthSync().compareTo(File(a).lengthSync()));
+            word_files.sort(
+                (a, b) => File(b).lengthSync().compareTo(File(a).lengthSync()));
+            ppt_files.sort(
+                (a, b) => File(b).lengthSync().compareTo(File(a).lengthSync()));
+            txt_files.sort(
+                (a, b) => File(b).lengthSync().compareTo(File(a).lengthSync()));
+            _RecentsFiles.sort(
+                (a, b) => File(b).lengthSync().compareTo(File(a).lengthSync()));
+          }
+          break;
+      }
+      _saveFiles();
+    });
+  }
+
+  String _getBaseName(String filePath) {
+    // Split the file path by the platform-specific separator
+    List<String> parts = filePath.split(Platform.pathSeparator);
+    // Get the last part of the split path, which represents the file name
+    String fileName = parts.last;
+    // Return the file name
+    return fileName;
+  }
+
+  DateTime getFileCreationDate(String filePath) {
+    File file = File(filePath);
+    try {
+      if (file.existsSync()) {
+        return file.lastModifiedSync();
+      } else {
+        // Return a default date if the file doesn't exist
+        return DateTime.now(); // Or any other default date you prefer
+      }
+    } catch (e) {
+      print(e);
+      // Re-throw the exception for unexpected errors
+      rethrow;
+    }
+  }
+
+  Future<int> getFileSize(String filePath) async {
+    File file = File(filePath);
+    try {
+      if (await file.exists()) {
+        return await file.length();
+      } else {
+        throw Exception("File does not exist: $filePath");
+      }
+    } catch (e) {
+      print(e);
+      rethrow; // Rethrow the exception for further handling
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // print(_permStatus);
@@ -339,15 +477,29 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
             width: 10,
           ),
           IconButton(
-            icon: const Icon(
-              Icons.sort,
-              color: Colors.white,
-              size: 30,
-            ),
-            onPressed: () {
-              // Handle sort functionality (your implementation)
-            },
-          ),
+              icon: const Icon(
+                Icons.sort,
+                color: Colors.white,
+                size: 30,
+              ),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return FilterModalBottomSheet(
+                      onApply: (sortBy, orderBy) {
+                        print('Sort By: $sortBy, Order By: $orderBy');
+
+                        setState(() {
+                          sortPathfile(sortBy, orderBy);
+                          _saveFiles();
+                          loadFiles();
+                        });
+                      },
+                    );
+                  },
+                );
+              }),
           SizedBox(
             width: 10,
           ),
@@ -453,442 +605,162 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    //search files listview update
-                    Visibility(
-                      visible: _Searching && _permStatus,
-                      child: Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: _SearchFiles.length,
-                          itemBuilder: (context, index) =>
-                              PdfListTile(_SearchFiles[index], context),
-                        ),
-                      ),
+                    //search files
+                    _buildListView(
+                      condition: _Searching && _permStatus,
+                      itemCount: _SearchFiles.length,
+                      itemBuilder: (index) =>
+                          PdfListTile(_SearchFiles[index], context),
                     ),
 
-                    //pdf files listview
-                    Visibility(
-                      visible: !_Searching &&
+                    //pdf files
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'PDF files' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      child: Expanded(
-                        child: pdf_files.isNotEmpty
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: pdf_files.length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = pdf_files[index];
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No PDF files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                      itemCount: pdf_files.length,
+                      itemBuilder: (index) {
+                        String filePath = pdf_files[index];
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No PDF files found',
                     ),
 
-                    //recent list view update
-                    Visibility(
-                      visible: !_Searching &&
-                          _selectedOption == 'Recents' &&
-                          _permStatus,
-                      child: Expanded(
-                        child: _RecentsFiles.isNotEmpty
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: _RecentsFiles.length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = _RecentsFiles[index];
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No Recent files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
-                    ),
-
-                    //word list view update
-                    Visibility(
-                      visible: !_Searching &&
+                    //Word files
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'Word' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      child: Expanded(
-                        child: word_files.isNotEmpty
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  controller: _scrollController,
-                                  itemCount: word_files.length,
-                                  itemBuilder: (context, index) {
-                                    String filePath = word_files[index];
-                                    bool exists = File(filePath).existsSync();
-                                    if (!exists)
-                                      return null; // Skip rendering if file does not exist
-                                    return PdfListTile(filePath, context);
-                                  },
-                                ),
-                              )
-                            : const Text(
-                                '\n     No Word files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                      itemCount: word_files.length,
+                      itemBuilder: (index) {
+                        String filePath = word_files[index];
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Word files found',
                     ),
 
-                    //ppt list view update
-                    Visibility(
-                      visible: !_Searching &&
+                    //ppt files
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'PPT' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      child: Expanded(
-                        child: ppt_files.isNotEmpty
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: ppt_files.length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = ppt_files[index];
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No PPT files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                      itemCount: ppt_files.length,
+                      itemBuilder: (index) {
+                        String filePath = ppt_files[index];
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Word files found',
                     ),
 
-                    //text list view updates
-                    Visibility(
-                      visible: !_Searching &&
+                    //text files
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'Text' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      child: Expanded(
-                        child: txt_files.isNotEmpty
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: txt_files.length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = txt_files[index];
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No Text files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                      itemCount: txt_files.length,
+                      itemBuilder: (index) {
+                        String filePath = txt_files[index];
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Text files found',
                     ),
 
-                    //bookmarked pdf files listview
-                    Visibility(
-                      visible: !_Searching &&
+                    // bookmarked pdf
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'PDF files' &&
                           _permStatus &&
                           widget.isBookmarked,
-                      child: Expanded(
-                        child: Bookmarked.any(
+                      itemCount: Bookmarked.where(
+                          (path) => path.toLowerCase().endsWith(".pdf")).length,
+                      itemBuilder: (index) {
+                        String filePath = Bookmarked.where(
                                 (path) => path.toLowerCase().endsWith(".pdf"))
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: Bookmarked.where((path) =>
-                                            path.toLowerCase().endsWith(".pdf"))
-                                        .length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = Bookmarked.where(
-                                              (path) => path
-                                                  .toLowerCase()
-                                                  .endsWith(".pdf"))
-                                          .elementAt(index);
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No Bookmarked PDF files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                            .elementAt(index);
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Bookmarked PDF files found',
                     ),
 
-                    //bookmarked Text files listview
-                    Visibility(
-                      visible: !_Searching &&
+                    // bookmarked text
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'Text' &&
                           _permStatus &&
                           widget.isBookmarked,
-                      child: Expanded(
-                        child: Bookmarked.any(
+                      itemCount: Bookmarked.where(
+                          (path) => path.toLowerCase().endsWith(".txt")).length,
+                      itemBuilder: (index) {
+                        String filePath = Bookmarked.where(
                                 (path) => path.toLowerCase().endsWith(".txt"))
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: Bookmarked.where((path) =>
-                                            path.toLowerCase().endsWith(".txt"))
-                                        .length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = Bookmarked.where(
-                                              (path) => path
-                                                  .toLowerCase()
-                                                  .endsWith(".txt"))
-                                          .elementAt(index);
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No Bookmarked Text files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                            .elementAt(index);
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Bookmarked Text files found',
                     ),
 
-                    //bookmarked ppt files listview
-                    Visibility(
-                      visible: !_Searching &&
+                    // bookmarked ppt
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'PPT' &&
                           _permStatus &&
                           widget.isBookmarked,
-                      child: Expanded(
-                        child: Bookmarked.any((path) =>
+                      itemCount: Bookmarked.where(
+                                  (path) => path.toLowerCase().endsWith(".ppt"))
+                              .length +
+                          Bookmarked.where((path) =>
+                              path.toLowerCase().endsWith(".pptx")).length,
+                      itemBuilder: (index) {
+                        String filePath = Bookmarked.where((path) =>
                                 path.toLowerCase().endsWith(".ppt") ||
                                 path.toLowerCase().endsWith(".pptx"))
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: Bookmarked.where((path) =>
-                                        path.toLowerCase().endsWith(".ppt") ||
-                                        path
-                                            .toLowerCase()
-                                            .endsWith(".pptx")).length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = Bookmarked.where(
-                                              (path) =>
-                                                  path
-                                                      .toLowerCase()
-                                                      .endsWith(".ppt") ||
-                                                  path
-                                                      .toLowerCase()
-                                                      .endsWith(".pptx"))
-                                          .elementAt(index);
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No Bookmarked PPT files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                            .elementAt(index);
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Bookmarked PPT files found',
                     ),
 
-                    //bookmarked ppt files listview
-                    Visibility(
-                      visible: !_Searching &&
+                    // bookmarked word
+                    _buildListView(
+                      condition: !_Searching &&
                           _selectedOption == 'Word' &&
                           _permStatus &&
                           widget.isBookmarked,
-                      child: Expanded(
-                        child: Bookmarked.any((path) =>
+                      itemCount: Bookmarked.where(
+                                  (path) => path.toLowerCase().endsWith(".doc"))
+                              .length +
+                          Bookmarked.where((path) =>
+                              path.toLowerCase().endsWith(".docx")).length,
+                      itemBuilder: (index) {
+                        String filePath = Bookmarked.where((path) =>
                                 path.toLowerCase().endsWith(".doc") ||
                                 path.toLowerCase().endsWith(".docx"))
-                            ? RefreshIndicator(
-                                color: Colors.black,
-                                // Add RefreshIndicator for swipe-to-refresh
-                                onRefresh: () async {
-                                  await _scanPdfFiles();
-                                },
-                                child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    controller: _scrollController,
-                                    itemCount: Bookmarked.where((path) =>
-                                        path.toLowerCase().endsWith(".doc") ||
-                                        path
-                                            .toLowerCase()
-                                            .endsWith(".docx")).length,
-                                    itemBuilder: (context, index) {
-                                      String filePath = Bookmarked.where(
-                                              (path) =>
-                                                  path
-                                                      .toLowerCase()
-                                                      .endsWith(".doc") ||
-                                                  path
-                                                      .toLowerCase()
-                                                      .endsWith(".docx"))
-                                          .elementAt(index);
-                                      bool exists = File(filePath).existsSync();
-                                      if (!exists)
-                                        return null; // Skip rendering if file does not exist
-                                      return PdfListTile(filePath, context);
-                                    }),
-                              )
-                            : const Text(
-                                '\n     No Bookmarked PPT files found',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
+                            .elementAt(index);
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Bookmarked Word files found',
                     ),
 
-                    //perission denied screen
+                    //Recents
+                    _buildListView(
+                      condition: !_Searching &&
+                          _selectedOption == 'Recents' &&
+                          _permStatus,
+                      itemCount: _RecentsFiles.length,
+                      itemBuilder: (index) {
+                        String filePath = _RecentsFiles[index];
+                        return PdfListTile(filePath, context);
+                      },
+                      emptyText: 'No Recent files found',
+                    ),
+
                     Visibility(
                       visible: !_permStatus,
-                      child: Container(
-                        width: double.infinity, // Occupy full width
-                        padding: const EdgeInsets.all(25.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(16.0), // Rounded corners
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  Colors.grey.withOpacity(0.2), // Subtle shadow
-                              blurRadius: 4.0,
-                              offset: const Offset(2.0, 2.0),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize:
-                              MainAxisSize.min, // Avoid excessive height
-                          children: [
-                            Image.asset(
-                              'assets/no-permission.png',
-                              width: MediaQuery.of(context).size.width -
-                                  150, // Or Expanded().flex
-                              fit: BoxFit.cover,
-                            ),
-                            const SizedBox(height: 20.0),
-                            const Text(
-                              'Permission Required',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Lato'),
-                            ),
-                            const SizedBox(height: 20.0),
-                            const Text(
-                              'Allow PDF Editor to access your files',
-                              textAlign: TextAlign.justify,
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 20.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                _scanPdfFiles();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(25.0),
-                                ),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 17, 0),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24.0, vertical: 12.0),
-                              ),
-                              child: const Text(
-                                'Allow',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _buildPermissionDeniedScreen(context),
                     ),
                   ],
                 ),
@@ -896,6 +768,92 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildListView({
+    required bool condition,
+    required int itemCount,
+    required Widget Function(int) itemBuilder,
+    String? emptyText,
+  }) {
+    return Visibility(
+      visible: condition,
+      child: Expanded(
+        child: itemCount > 0
+            ? RefreshIndicator(
+                color: Colors.black,
+                onRefresh: _scanPdfFiles,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: itemCount,
+                  itemBuilder: (context, index) => itemBuilder(index),
+                ),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  '\n     $emptyText',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildPermissionDeniedScreen(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(25.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 4.0,
+            offset: const Offset(2.0, 2.0),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/no-permission.png',
+            width: MediaQuery.of(context).size.width - 150,
+            fit: BoxFit.cover,
+          ),
+          const SizedBox(height: 20.0),
+          const Text(
+            'Permission Required',
+            style: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Lato'),
+          ),
+          const SizedBox(height: 20.0),
+          const Text(
+            'Allow PDF Editor to access your files',
+            textAlign: TextAlign.justify,
+            style: TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 20.0),
+          ElevatedButton(
+            onPressed: _scanPdfFiles,
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              ),
+              backgroundColor: const Color.fromARGB(255, 255, 17, 0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            ),
+            child: const Text(
+              'Allow',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -972,7 +930,16 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
           maxLines: 1,
           overflow: TextOverflow.ellipsis),
-      subtitle: Text(DateConvert(filePath)),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(DateConvert(filePath)),
+          SizedBox(
+            width: 15,
+          ),
+          Text(filesize(filePath)),
+        ],
+      ),
       leading: Image(
         image: AssetImage(imagepath), // Replace with your image path
         width: 45, // Adjust width and height as needed
@@ -1162,7 +1129,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) => Dialog(
-                              // Use Dialog instead of Dialogue
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
@@ -1204,7 +1170,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                             await SharedPreferences.getInstance();
                         prefs.setStringList('recentFiles', _RecentsFiles);
 
-                        // Display appropriate SnackBar message
                         final snackBarContent = isBookmarked
                             ? ' removed from Bookmarks'
                             : ' added to the Bookmarks';
@@ -1421,6 +1386,20 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
         _saveFiles();
       });
+    }
+  }
+
+  String filesize(String filePath) {
+    File file = File(filePath);
+    int fileSizeInBytes = file.lengthSync();
+    double fileSizeInKb = fileSizeInBytes / 1024;
+
+    if (fileSizeInKb > 1023.9) {
+      String fileSize = (fileSizeInKb / 1024).toStringAsFixed(2);
+      return (fileSize + 'MB');
+    } else {
+      String fileSize = (fileSizeInBytes / 1024).toStringAsFixed(2);
+      return (fileSize + 'KB');
     }
   }
 

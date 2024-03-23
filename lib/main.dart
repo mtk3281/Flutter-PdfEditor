@@ -55,9 +55,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: BottomTabBar(
-        key: homeScreenKey,
-      ),
+      home: BottomTabBar(),
     );
   }
 }
@@ -88,11 +86,17 @@ class _BottomTabBarState extends State<BottomTabBar> {
       const ToolsScreen(),
       const ToolsScreen(),
     ];
+
     return Scaffold(
-      body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        children: screens,
+      body: Stack(
+        children: screens.asMap().entries.map((entry) {
+          final int index = entry.key;
+          final Widget screen = entry.value;
+          return Offstage(
+            offstage: _index != index,
+            child: screen,
+          );
+        }).toList(),
       ),
       bottomNavigationBar: SlidingClippedNavBar(
         selectedIndex: _index,
@@ -100,11 +104,6 @@ class _BottomTabBarState extends State<BottomTabBar> {
         onButtonPressed: (value) {
           setState(() {
             _index = value;
-            _pageController.animateToPage(
-              value,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInToLinear, // Experiment with different curves
-            );
           });
         },
         iconSize: 30,
