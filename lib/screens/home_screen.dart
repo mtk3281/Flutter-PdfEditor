@@ -198,7 +198,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     await prefs.setStringList('ppt_files', ppt_files);
     await prefs.setStringList('txt_files', txt_files);
     await prefs.setStringList("bookmarked", Bookmarked);
-    await prefs.setStringList('recentFiles', _RecentsFiles);
+
     await prefs.setBool(
         'permissionStatus', _permStatus); // Save permission status
     _len = pdf_files.length;
@@ -210,6 +210,11 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
       _RecentsFiles.insert(0, filePath);
     }
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('recentFiles', _RecentsFiles);
+  }
+
+  void _sortRecentFile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setStringList('recentFiles', _RecentsFiles);
   }
@@ -307,7 +312,8 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 .compareTo(_getBaseName(b).toLowerCase()));
             ppt_files.sort((a, b) => _getBaseName(a)
                 .toLowerCase()
-                .compareTo(_getBaseName(b).toLowerCase()));
+                .trim()
+                .compareTo(_getBaseName(b).toLowerCase().trim()));
             txt_files.sort((a, b) => _getBaseName(a)
                 .toLowerCase()
                 .compareTo(_getBaseName(b).toLowerCase()));
@@ -323,7 +329,8 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 .compareTo(_getBaseName(a).toLowerCase()));
             ppt_files.sort((a, b) => _getBaseName(b)
                 .toLowerCase()
-                .compareTo(_getBaseName(a).toLowerCase()));
+                .trim()
+                .compareTo(_getBaseName(a).toLowerCase().trim()));
             txt_files.sort((a, b) => _getBaseName(b)
                 .toLowerCase()
                 .compareTo(_getBaseName(a).toLowerCase()));
@@ -384,7 +391,17 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
           }
           break;
       }
-      _saveFiles();
+    });
+
+    setState(() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+          'pdfFiles', pdf_files); // Await saving operation
+      await prefs.setStringList('recentFiles', _RecentsFiles);
+      await prefs.setStringList('word_files', word_files);
+      await prefs.setStringList('ppt_files', ppt_files);
+      await prefs.setStringList('txt_files', txt_files);
+      await prefs.setStringList("bookmarked", Bookmarked);
     });
   }
 
@@ -393,8 +410,14 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     List<String> parts = filePath.split(Platform.pathSeparator);
     // Get the last part of the split path, which represents the file name
     String fileName = parts.last;
-    // Return the file name
-    return fileName;
+    // Split the file name by the period (.) to separate the base name and extension
+    List<String> nameParts = fileName.split('.');
+    // Take the first part of the split string, which represents the base name
+    String baseName = nameParts.first;
+    // Trim spaces from the base name
+    baseName = baseName.trim();
+    // Return the base name
+    return baseName;
   }
 
   DateTime getFileCreationDate(String filePath) {
@@ -492,8 +515,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
                         setState(() {
                           sortPathfile(sortBy, orderBy);
-                          _saveFiles();
-                          loadFiles();
                         });
                       },
                     );
@@ -619,24 +640,34 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                           _selectedOption == 'PDF files' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      itemCount: pdf_files.length,
+                      itemCount: pdf_files
+                          .where((filePath) => File(filePath).existsSync())
+                          .length,
                       itemBuilder: (index) {
                         String filePath = pdf_files[index];
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No PDF files found',
                     ),
 
-                    //Word files
+                    //word files
                     _buildListView(
                       condition: !_Searching &&
                           _selectedOption == 'Word' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      itemCount: word_files.length,
+                      itemCount: word_files
+                          .where((filePath) => File(filePath).existsSync())
+                          .length,
                       itemBuilder: (index) {
                         String filePath = word_files[index];
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Word files found',
                     ),
@@ -647,24 +678,34 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                           _selectedOption == 'PPT' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      itemCount: ppt_files.length,
+                      itemCount: ppt_files
+                          .where((filePath) => File(filePath).existsSync())
+                          .length,
                       itemBuilder: (index) {
                         String filePath = ppt_files[index];
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
-                      emptyText: 'No Word files found',
+                      emptyText: 'No PPT files found',
                     ),
 
-                    //text files
+                    //Text files
                     _buildListView(
                       condition: !_Searching &&
                           _selectedOption == 'Text' &&
                           _permStatus &&
                           !widget.isBookmarked,
-                      itemCount: txt_files.length,
+                      itemCount: txt_files
+                          .where((filePath) => File(filePath).existsSync())
+                          .length,
                       itemBuilder: (index) {
                         String filePath = txt_files[index];
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Text files found',
                     ),
@@ -681,7 +722,10 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         String filePath = Bookmarked.where(
                                 (path) => path.toLowerCase().endsWith(".pdf"))
                             .elementAt(index);
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Bookmarked PDF files found',
                     ),
@@ -698,7 +742,10 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         String filePath = Bookmarked.where(
                                 (path) => path.toLowerCase().endsWith(".txt"))
                             .elementAt(index);
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Bookmarked Text files found',
                     ),
@@ -719,7 +766,10 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                                 path.toLowerCase().endsWith(".ppt") ||
                                 path.toLowerCase().endsWith(".pptx"))
                             .elementAt(index);
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Bookmarked PPT files found',
                     ),
@@ -740,7 +790,10 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                                 path.toLowerCase().endsWith(".doc") ||
                                 path.toLowerCase().endsWith(".docx"))
                             .elementAt(index);
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Bookmarked Word files found',
                     ),
@@ -753,7 +806,10 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                       itemCount: _RecentsFiles.length,
                       itemBuilder: (index) {
                         String filePath = _RecentsFiles[index];
-                        return PdfListTile(filePath, context);
+                        if (File(filePath).existsSync()) {
+                          return PdfListTile(filePath, context);
+                        }
+                        return SizedBox();
                       },
                       emptyText: 'No Recent files found',
                     ),
@@ -1358,35 +1414,36 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (newpath != null) {
       String ext = path.basename(filePath).split('.').last.toLowerCase();
-      print(newpath);
       setState(() {
-        if (pdf_files.contains(filePath)) {
-          pdf_files.remove(filePath);
+        List<List<String>> allFileLists = [
+          pdf_files,
+          _RecentsFiles,
+          word_files,
+          ppt_files,
+          txt_files,
+          Bookmarked
+        ];
+        for (var fileList in allFileLists) {
+          if (fileList.contains(filePath)) {
+            fileList.remove(filePath);
+          }
+        }
+        if (newpath.endsWith(".pdf")) {
           pdf_files.insert(0, newpath);
-        }
-        if (_RecentsFiles.contains(filePath)) {
-          _RecentsFiles.remove(filePath);
-          _addRecentFile(newpath);
-        }
-        if (word_files.contains(filePath)) {
-          word_files.remove(filePath);
+        } else if (newpath.endsWith(".docx") || newpath.endsWith(".doc")) {
           word_files.insert(0, newpath);
-        }
-        if (ppt_files.contains(filePath)) {
-          ppt_files.remove(filePath);
+        } else if (newpath.endsWith('.ppt') || newpath.endsWith('.pptx')) {
           ppt_files.insert(0, newpath);
-        }
-        if (txt_files.contains(filePath)) {
-          txt_files.remove(filePath);
+        } else if (newpath.endsWith('txt')) {
           txt_files.insert(0, newpath);
         }
-        if (Bookmarked.contains(filePath)) {
-          Bookmarked.remove(filePath);
-        }
-
         _saveFiles();
       });
     }
+
+    setState(() {
+      _saveFiles(); // Save updated lists
+    });
   }
 
   String filesize(String filePath) {
