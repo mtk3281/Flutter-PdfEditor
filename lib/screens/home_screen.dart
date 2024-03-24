@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'HomePage/RenameDialogue.dart';
 import 'HomePage/DeleteDialogue.dart';
 import 'HomePage/sort file.dart';
+import 'HomePage/SearchPage.dart';
 
 void main() {
   bool isBookmarked = false;
@@ -436,23 +437,8 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future<int> getFileSize(String filePath) async {
-    File file = File(filePath);
-    try {
-      if (await file.exists()) {
-        return await file.length();
-      } else {
-        throw Exception("File does not exist: $filePath");
-      }
-    } catch (e) {
-      print(e);
-      rethrow; // Rethrow the exception for further handling
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    // print(_permStatus);
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -469,62 +455,70 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         // Adjust toolbar height
         toolbarHeight: 65.0,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.search,
-              color: Colors.white,
-              size: 30,
-            ),
-            onPressed: () {
-              // Handle search functionality (your implementation)
-            },
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.folder_open_outlined,
-              color: Colors.white,
-              size: 30,
-            ),
-            onPressed: () async {
-              final file = await PDFApi.pickFile();
-              if (file == null) return;
-              openPDF(context, file);
-              _RecentsFiles.add(file.path);
-            },
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          IconButton(
-              icon: const Icon(
-                Icons.sort,
-                color: Colors.white,
-                size: 30,
-              ),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return FilterModalBottomSheet(
-                      onApply: (sortBy, orderBy) {
-                        print('Sort By: $sortBy, Order By: $orderBy');
+        actions: widget.isBookmarked
+            ? []
+            : [
+                IconButton(
+                  icon: const Icon(
+                    Icons.search,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchPage(),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.folder_open_outlined,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  onPressed: () async {
+                    final file = await PDFApi.pickFile();
+                    if (file == null) return;
+                    openPDF(context, file);
+                    _RecentsFiles.add(file.path);
+                  },
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.sort,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return FilterModalBottomSheet(
+                          onApply: (sortBy, orderBy) {
+                            print('Sort By: $sortBy, Order By: $orderBy');
 
-                        setState(() {
-                          sortPathfile(sortBy, orderBy);
-                        });
+                            setState(() {
+                              sortPathfile(sortBy, orderBy);
+                            });
+                          },
+                        );
                       },
                     );
                   },
-                );
-              }),
-          SizedBox(
-            width: 10,
-          ),
-        ],
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+              ],
         bottom: PreferredSize(
           preferredSize:
               const Size.fromHeight(60.0), // Adjust bottom section height
@@ -626,14 +620,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    //search files
-                    _buildListView(
-                      condition: _Searching && _permStatus,
-                      itemCount: _SearchFiles.length,
-                      itemBuilder: (index) =>
-                          PdfListTile(_SearchFiles[index], context),
-                    ),
-
                     //pdf files
                     _buildListView(
                       condition: !_Searching &&

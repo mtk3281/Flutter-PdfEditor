@@ -120,6 +120,8 @@ flutter:
     - assets/pdf-icon3.png
     - assets/access-permission.png
     - assets/no-permission.png
+    - assets/no-recent-search.png
+
     - assets/qr-scan.png
 
 
