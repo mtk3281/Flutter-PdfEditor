@@ -504,8 +504,6 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                       builder: (context) {
                         return FilterModalBottomSheet(
                           onApply: (sortBy, orderBy) {
-                            print('Sort By: $sortBy, Order By: $orderBy');
-
                             setState(() {
                               sortPathfile(sortBy, orderBy);
                             });
@@ -636,7 +634,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No PDF files found',
+                      // emptyText: 'No PDF files found',
                     ),
 
                     //word files
@@ -655,7 +653,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Word files found',
+                      // emptyText: 'No Word files found',
                     ),
 
                     //ppt files
@@ -674,7 +672,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No PPT files found',
+                      // emptyText: 'No PPT files found',
                     ),
 
                     //Text files
@@ -693,7 +691,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Text files found',
+                      // emptyText: 'No Text files found',
                     ),
 
                     // bookmarked pdf
@@ -713,7 +711,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Bookmarked PDF files found',
+                      // emptyText: 'No Bookmarked PDFfs files found',
                     ),
 
                     // bookmarked text
@@ -733,7 +731,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Bookmarked Text files found',
+                      // emptyText: 'No Bookmarked Text files found',
                     ),
 
                     // bookmarked ppt
@@ -757,7 +755,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Bookmarked PPT files found',
+                      // emptyText: 'No Bookmarked PPT files found',
                     ),
 
                     // bookmarked word
@@ -781,7 +779,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Bookmarked Word files found',
+                      // emptyText: 'No Bookmarked Word files found',
                     ),
 
                     //Recents
@@ -797,7 +795,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                         }
                         return SizedBox();
                       },
-                      emptyText: 'No Recent files found',
+                      // emptyText: 'No Recent files found',
                     ),
 
                     Visibility(
@@ -818,7 +816,7 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
     required bool condition,
     required int itemCount,
     required Widget Function(int) itemBuilder,
-    String? emptyText,
+    // String? emptyText,
   }) {
     return Visibility(
       visible: condition,
@@ -833,11 +831,40 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
                   itemBuilder: (context, index) => itemBuilder(index),
                 ),
               )
-            : Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  '\n     $emptyText',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            : RefreshIndicator(
+                color: Colors.black,
+                onRefresh: _scanPdfFiles,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(25.0),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 234, 234, 234),
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/no-recent-search.png',
+                            width: MediaQuery.of(context).size.width - 120,
+                            fit: BoxFit.cover,
+                          ),
+                          const SizedBox(height: 20.0),
+                          const Text(
+                            'No File Found',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Lato'),
+                          ),
+                          const SizedBox(height: 20.0),
+                        ],
+                      ),
+                    )
+                  ],
                 ),
               ),
       ),
@@ -1521,12 +1548,5 @@ class PdfEditorState extends State<HomeScreen> with WidgetsBindingObserver {
         ],
       ),
     );
-  }
-
-  void _requestPermission() async {
-    PermissionStatus status = await FileFinder.checkPermissions();
-    if (status.isGranted) {
-      _scanPdfFiles();
-    }
   }
 }
